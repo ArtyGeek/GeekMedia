@@ -1,0 +1,9 @@
+<resources>
+
+    <dimen name="status_bar_height">0dp</dimen>
+    <dimen name="status_bar_height_negative">0dp</dimen>
+
+    <dimen name="fragment_video_player_loader_size">56dp</dimen>
+    <dimen name="fragment_video_player_controller_height">32dp</dimen>
+    
+</resources>

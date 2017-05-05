@@ -6,5 +6,5 @@ public interface VideoSize {
 
     int getHeight();
 
-    float getPixelWidthHeightRatio();
+    float getAspectRatio();
 }

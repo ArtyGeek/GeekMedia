@@ -33,23 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorMediaSource.EventListener {
-
-    public interface OnPlayerStateChangeListener {
-        void onPlayerStateChanged(boolean playWhenReady, int playbackState);
-    }
-
-    public interface OnProgressChangeListener {
-        void onProgressChanged(int progress);
-    }
-
-    public interface OnPreparedListener {
-        void onPrepared();
-    }
-
-    public interface OnVideoPlayerSizeChangeListener {
-        void onVideoSizeChanged(VideoSize videoSize);
-    }
+public final class ExoVideoPlayer implements VideoPlayer, SimpleExoPlayer.EventListener, ExtractorMediaSource.EventListener {
 
     public static final String TAG = ExoVideoPlayer.class.getSimpleName();
 
@@ -60,7 +44,7 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
     private final DefaultDataSourceFactory mDataSourceFactory;
     private final ExtractorsFactory mExtractorsFactory;
 
-    private final List<WeakReference<OnPlayerStateChangeListener>> mOnPlayerStateChangeListeners = new ArrayList<>();
+    private final List<WeakReference<OnPlaybackChangeListener>> mOnPlaybackChangeListeners = new ArrayList<>();
     private final List<WeakReference<OnProgressChangeListener>> mOnProgressChangeListeners = new ArrayList<>();
     private final OnProgressChangeListener mOnProgressChangeListenerDelegate = new OnProgressChangeListenerDelegate(mOnProgressChangeListeners);
     private final List<WeakReference<OnPreparedListener>> mOnPreparedListeners = new ArrayList<>();
@@ -78,91 +62,113 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
         mExtractorsFactory = new DefaultExtractorsFactory();
     }
 
+    @Override
     public void play(@NonNull final String source) {
         Uri uri = Uri.parse(source);
         play(uri);
     }
 
+    @Override
     public void play(@NonNull final Uri uri) {
         mPlayer.prepare(buildMediaSource(uri));
         mPlayer.setPlayWhenReady(true);
     }
 
+    @Override
     public void resume() {
         mPlayer.setPlayWhenReady(true);
     }
 
+    @Override
     public void pause() {
         mPlayer.setPlayWhenReady(false);
     }
 
+    @Override
     public void stop() {
-        if (mPlayer != null) {
-            mPlayer.stop();
-            mPlayer.release();
-        }
+        mPlayer.stop();
     }
 
+    @Override
+    public void release() {
+        mPlayer.release();
+    }
+
+    @Override
     public void setTexture(@NonNull TextureView texture) {
         mPlayer.setVideoTextureView(texture);
     }
 
+    @Override
     public boolean isPlaying() {
         return mPlayer.getPlayWhenReady();
     }
 
+    @Override
     public int getDuration() {
         return (int) mPlayer.getDuration();
     }
 
+    @Override
     public boolean isReady() {
         return mPlayer != null;
     }
 
+    @Override
     public boolean isLooping() {
         return mIsLooping;
     }
 
+    @Override
     public void mute() {
         mPlayer.setVolume(0f);
     }
 
+    @Override
     public void unMute() {
         mPlayer.setVolume(1f);
     }
 
+    @Override
     public boolean isMuted() {
         return mPlayer.getVolume() == 0f;
     }
 
+    @Override
     public void setLooping(boolean isLooping) {
         mIsLooping = isLooping;
     }
 
+    @Override
     public int getCurrentPosition() {
         return (int) mPlayer.getCurrentPosition();
     }
 
+    @Override
     public void seekTo(int position) {
         mPlayer.seekTo(position);
     }
 
-    public void addOnPlayerStateChangeListener(@NonNull OnPlayerStateChangeListener listener) {
-        mOnPlayerStateChangeListeners.add(new WeakReference<>(listener));
+    @Override
+    public void addOnPlayerStateChangeListener(@NonNull OnPlaybackChangeListener listener) {
+        mOnPlaybackChangeListeners.add(new WeakReference<>(listener));
     }
 
-    public void removeOnPlayerStateChangeListener(@NonNull OnPlayerStateChangeListener listener) {
-        for (WeakReference<OnPlayerStateChangeListener> ref : mOnPlayerStateChangeListeners) {
+    @Override
+    public void removeOnPlayerStateChangeListener(@NonNull OnPlaybackChangeListener listener) {
+        for (WeakReference<OnPlaybackChangeListener> ref : mOnPlaybackChangeListeners) {
             if (ref.get() == listener) {
-                mOnPlayerStateChangeListeners.remove(ref);
+                mOnPlaybackChangeListeners.remove(ref);
             }
         }
     }
 
+    @Override
     public void addOnProgressChangeListener(@NonNull OnProgressChangeListener listener) {
         mOnProgressChangeListeners.add(new WeakReference<>(listener));
     }
 
+    @Override
     public void removeOnProgressChangeListener(@NonNull OnProgressChangeListener listener) {
         for (WeakReference<OnProgressChangeListener> ref : mOnProgressChangeListeners) {
             if (ref.get() == listener) {
@@ -171,10 +177,12 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
         }
     }
 
+    @Override
     public void addOnPreparedListener(@NonNull OnPreparedListener listener) {
         mOnPreparedListeners.add(new WeakReference<>(listener));
     }
 
+    @Override
     public void removeOnPreparedListener(@NonNull OnPreparedListener listener) {
         for (WeakReference<OnPreparedListener> ref : mOnPreparedListeners) {
             if (ref.get() == listener) {
@@ -183,10 +191,12 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
         }
     }
 
+    @Override
     public void addOnVideoPlayerSizeChangeListener(@NonNull OnVideoPlayerSizeChangeListener listener) {
         mOnVideoPlayerSizeChangeListeners.add(new WeakReference<>(listener));
     }
 
+    @Override
     public void removeOnVideoPlayerSizeChangeListener(@NonNull OnVideoPlayerSizeChangeListener listener) {
         for (WeakReference<OnVideoPlayerSizeChangeListener> ref : mOnVideoPlayerSizeChangeListeners) {
             if (ref.get() == listener) {
@@ -212,10 +222,10 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        notifyPlayerStateChanged(playWhenReady, playbackState);
+        notifyPlayerStateChanged(playWhenReady);
         if (playWhenReady) {
             if (mObserverFuture == null || mObserverFuture.isDone()) {
-                mObserverFuture = mObserverExecutor.schedule(buildObserverRunnable(), 50, TimeUnit.MILLISECONDS);
+                mObserverFuture = mObserverExecutor.scheduleAtFixedRate(buildObserverRunnable(), 50, 50, TimeUnit.MILLISECONDS);
             }
         } else {
             if (mObserverFuture != null && !mObserverFuture.isDone()) {
@@ -274,13 +284,13 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
         }
     }
 
-    private void notifyPlayerStateChanged(final boolean playWhenReady, final int playbackState) {
-        for (final WeakReference<OnPlayerStateChangeListener> ref : mOnPlayerStateChangeListeners) {
+    private void notifyPlayerStateChanged(final boolean playWhenReady) {
+        for (final WeakReference<OnPlaybackChangeListener> ref : mOnPlaybackChangeListeners) {
             if (ref.get() != null) {
                 UI_HANDLER.post(new Runnable() {
                     @Override
                     public void run() {
-                        ref.get().onPlayerStateChanged(playWhenReady, playbackState);
+                        ref.get().onPlaybackChanged(playWhenReady);
                     }
                 });
             }
@@ -319,7 +329,7 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
                                        final int unappliedRotationDegrees,
                                        final float pixelWidthHeightRatio) {
 
-            final VideoSize size = SimpleVideoSize.from(width, height, pixelWidthHeightRatio);
+            final VideoSize size = SimpleVideoSize.fromWidthHeightRatio(width, height, pixelWidthHeightRatio);
             for (final WeakReference<OnVideoPlayerSizeChangeListener> ref : mOnVideoPlayerSizeChangeListeners) {
                 if (ref.get() != null) {
                     UI_HANDLER.post(new Runnable() {
@@ -340,10 +350,10 @@ public class ExoVideoPlayer implements SimpleExoPlayer.EventListener, ExtractorM
 
     private static class ExoPlayerProgressObserverRunnable implements Runnable {
 
-        private final ExoVideoPlayer mPlayer;
-        private final ExoVideoPlayer.OnProgressChangeListener mListener;
+        private final VideoPlayer mPlayer;
+        private final VideoPlayer.OnProgressChangeListener mListener;
 
-        ExoPlayerProgressObserverRunnable(ExoVideoPlayer exoPlayer, ExoVideoPlayer.OnProgressChangeListener listener) {
+        ExoPlayerProgressObserverRunnable(VideoPlayer exoPlayer, VideoPlayer.OnProgressChangeListener listener) {
             mPlayer = exoPlayer;
             mListener = listener;
         }

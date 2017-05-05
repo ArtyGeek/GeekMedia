@@ -4,16 +4,17 @@ final class SimpleVideoSize implements VideoSize {
 
     private final int mWidth;
     private final int mHeight;
-    private final float mPixelWidthHeightRatio;
+    private final float mAspectRatio;
 
-    public static SimpleVideoSize from(int width, int height, float pixelWidthHeightRatio) {
-        return new SimpleVideoSize(width, height, pixelWidthHeightRatio);
+    public static SimpleVideoSize fromWidthHeightRatio(int width, int height, float pixelWidthHeightRatio) {
+        float aspectRatio = height == 0 ? 1 : (width * pixelWidthHeightRatio) / height;
+        return new SimpleVideoSize(width, height, aspectRatio);
     }
 
-    private SimpleVideoSize(int width, int height, float pixelWidthHeightRatio) {
+    private SimpleVideoSize(int width, int height, float aspectRatio) {
         mWidth = width;
         mHeight = height;
-        mPixelWidthHeightRatio = pixelWidthHeightRatio;
+        mAspectRatio = aspectRatio;
     }
 
     @Override
@@ -27,7 +28,7 @@ final class SimpleVideoSize implements VideoSize {
     }
 
     @Override
-    public float getPixelWidthHeightRatio() {
-        return mPixelWidthHeightRatio;
+    public float getAspectRatio() {
+        return mAspectRatio;
     }
 }
