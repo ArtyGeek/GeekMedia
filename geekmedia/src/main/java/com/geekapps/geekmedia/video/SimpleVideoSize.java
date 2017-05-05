@@ -1,4 +1,4 @@
-package com.geekapps.geekmedia;
+package com.geekapps.geekmedia.video;
 
 final class SimpleVideoSize implements VideoSize {
 

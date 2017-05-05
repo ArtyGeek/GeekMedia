@@ -1,10 +1,10 @@
-package com.geekapps.geekmedia;
+package com.geekapps.geekmedia.video;
 
 import android.widget.SeekBar;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class VideoPlayerSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
+public final class VideoPlayerSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
 
     private final VideoPlayer mPlayer;
     private final AtomicBoolean mDraggingFlag;

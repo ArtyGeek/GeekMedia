@@ -1,4 +1,4 @@
-package com.geekapps.geekmedia;
+package com.geekapps.geekmedia.video;
 
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
@@ -16,6 +16,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
+import com.geekapps.geekmedia.image.ImageDownloader;
+import com.geekapps.geekmedia.image.ImageDownloaderFactory;
+import com.geekapps.geekmedia.image.PicassoImageDownloaderFactory;
+import com.geekapps.geekmedia.R;
+import com.geekapps.geekmedia.SeekBarUtils;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 

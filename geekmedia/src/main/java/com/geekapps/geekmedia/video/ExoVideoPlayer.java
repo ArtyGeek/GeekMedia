@@ -1,4 +1,4 @@
-package com.geekapps.geekmedia;
+package com.geekapps.geekmedia.video;
 
 import android.content.Context;
 import android.net.Uri;

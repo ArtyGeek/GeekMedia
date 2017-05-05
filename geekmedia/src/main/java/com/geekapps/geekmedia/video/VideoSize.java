@@ -1,4 +1,4 @@
-package com.geekapps.geekmedia;
+package com.geekapps.geekmedia.video;
 
 public interface VideoSize {
 

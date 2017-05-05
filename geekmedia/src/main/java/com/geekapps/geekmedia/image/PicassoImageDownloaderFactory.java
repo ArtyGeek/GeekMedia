@@ -1,8 +1,8 @@
-package com.geekapps.geekmedia;
+package com.geekapps.geekmedia.image;
 
 import android.content.Context;
 
-public class PicassoImageDownloaderFactory  implements ImageDownloaderFactory {
+public final class PicassoImageDownloaderFactory  implements ImageDownloaderFactory {
 
     @Override
     public ImageDownloader provideImageDownloader(Context context) {

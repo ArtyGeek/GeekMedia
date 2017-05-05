@@ -1,8 +1,8 @@
-package com.geekapps.geekmedia;
+package com.geekapps.geekmedia.video;
 
 import android.content.Context;
 
-public class ExoPlayerVideoFactory implements VideoPlayerFactory {
+public final class ExoPlayerVideoFactory implements VideoPlayerFactory {
 
     @Override
     public VideoPlayer provideVideoPlayer(Context context) {
