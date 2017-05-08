@@ -6,6 +6,6 @@ public final class ExoPlayerVideoFactory implements VideoPlayerFactory {
 
     @Override
     public VideoPlayer provideVideoPlayer(Context context) {
-        return new ExoVideoPlayer(context);
+        return ExoVideoPlayer.from(context);
     }
 }
