@@ -7,6 +7,9 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.view.TextureView;
 
+import com.geekapps.geekmedia.OnPlaybackChangeListener;
+import com.geekapps.geekmedia.OnPreparedListener;
+import com.geekapps.geekmedia.OnProgressChangeListener;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -351,9 +354,9 @@ public final class ExoVideoPlayer implements VideoPlayer, SimpleExoPlayer.EventL
     private static class ExoPlayerProgressObserverRunnable implements Runnable {
 
         private final VideoPlayer mPlayer;
-        private final VideoPlayer.OnProgressChangeListener mListener;
+        private final OnProgressChangeListener mListener;
 
-        ExoPlayerProgressObserverRunnable(VideoPlayer exoPlayer, VideoPlayer.OnProgressChangeListener listener) {
+        ExoPlayerProgressObserverRunnable(VideoPlayer exoPlayer, OnProgressChangeListener listener) {
             mPlayer = exoPlayer;
             mListener = listener;
         }

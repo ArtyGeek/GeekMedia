@@ -4,21 +4,13 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.view.TextureView;
 
+import com.geekapps.geekmedia.OnPlaybackChangeListener;
+import com.geekapps.geekmedia.OnPreparedListener;
+import com.geekapps.geekmedia.OnProgressChangeListener;
+
 public interface VideoPlayer {
 
-    public interface OnPlaybackChangeListener {
-        void onPlaybackChanged(boolean isPlaying);
-    }
-
-    public interface OnProgressChangeListener {
-        void onProgressChanged(int progress);
-    }
-
-    public interface OnPreparedListener {
-        void onPrepared();
-    }
-
-    public interface OnVideoPlayerSizeChangeListener {
+    interface OnVideoPlayerSizeChangeListener {
         void onVideoSizeChanged(VideoSize videoSize);
     }
 

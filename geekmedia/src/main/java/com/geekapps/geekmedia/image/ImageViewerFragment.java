@@ -29,12 +29,18 @@ public class ImageViewerFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        onBeforeCreate();
         Bundle args = getArguments();
         if (args == null) {
             throw new IllegalStateException("ImageViewerFragment must be instantiated via `newInstance` factory method");
         }
         mImageData = (ImageData) args.getSerializable(EXTRA_IMAGE_DATA);
         mImageDownloader = getImageDownloaderFactory().provideImageDownloader(getContext());
+    }
+
+    //For DI purposes
+    protected void onBeforeCreate() {
+
     }
 
     @Nullable

@@ -10,5 +10,4 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"/>
 
-
 </android.support.design.widget.CoordinatorLayout>

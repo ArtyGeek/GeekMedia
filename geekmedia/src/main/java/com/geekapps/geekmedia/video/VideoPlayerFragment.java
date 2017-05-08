@@ -16,6 +16,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
+import com.geekapps.geekmedia.OnPreparedListener;
+import com.geekapps.geekmedia.OnProgressChangeListener;
 import com.geekapps.geekmedia.image.ImageDownloader;
 import com.geekapps.geekmedia.image.ImageDownloaderFactory;
 import com.geekapps.geekmedia.image.PicassoImageDownloaderFactory;
@@ -28,8 +30,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class VideoPlayerFragment extends Fragment implements
-        VideoPlayer.OnProgressChangeListener,
-        VideoPlayer.OnPreparedListener,
+        OnProgressChangeListener,
+        OnPreparedListener,
         VideoPlayer.OnVideoPlayerSizeChangeListener {
 
     public static final String TAG = VideoPlayerFragment.class.getName();
@@ -65,6 +67,7 @@ public class VideoPlayerFragment extends Fragment implements
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        onBeforeCreate();
 
         Bundle args = getArguments();
         if (args != null) {
@@ -76,6 +79,11 @@ public class VideoPlayerFragment extends Fragment implements
         mShouldPlay = true;
 
         mAnimationDuration = getContext().getResources().getInteger(android.R.integer.config_shortAnimTime);
+    }
+
+    //For DI purposes
+    protected void onBeforeCreate() {
+
     }
 
     @Nullable
@@ -90,7 +98,7 @@ public class VideoPlayerFragment extends Fragment implements
         mPlaceholderContainer = (FrameLayout) view.findViewById(R.id.fragment_video_player_placeholder);
         mPlaceholderPreview = (ImageView) view.findViewById(R.id.fragment_video_player_placeholder_image);
         mPlaceholderLoader = (CircularProgressView) view.findViewById(R.id.fragment_video_player_placeholder_loader);
-        mPlaceholderLoader.setColor(getControllerColor());
+        mPlaceholderLoader.setColor(getPlaceholderLoaderColor());
 
         mTextureHolder = (AspectRatioFrameLayout) view.findViewById(R.id.fragment_video_player_texture_holder);
         mTexture = (TextureView) view.findViewById(R.id.fragment_video_player_texture);

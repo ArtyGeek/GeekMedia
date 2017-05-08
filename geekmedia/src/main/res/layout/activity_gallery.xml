@@ -1,0 +1,43 @@
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:fitsSystemWindows="true">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/activity_gallery_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/status_bar_height_negative"
+        android:clickable="true"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/activity_gallery_photo_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/status_bar_height_negative"
+        android:transitionName="@string/transition_name_photo"/>
+
+    <FrameLayout
+        android:id="@+id/activity_gallery_indicator_container"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/activity_gallery_indicators_height"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="@dimen/activity_gallery_indicators_margin_bottom"
+        android:background="@drawable/background_indicator_container"
+        android:paddingEnd="@dimen/activity_gallery_indicators_padding_start"
+        android:paddingLeft="@dimen/activity_gallery_indicators_padding_end"
+        android:paddingRight="@dimen/activity_gallery_indicators_padding_start"
+        android:paddingStart="@dimen/activity_gallery_indicators_padding_end"
+        android:visibility="invisible">
+
+        <com.geekapps.geekmedia.CircleIndicator
+            android:id="@+id/activity_gallery_indicators"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>
+
+    </FrameLayout>
+
+</android.support.design.widget.CoordinatorLayout>
