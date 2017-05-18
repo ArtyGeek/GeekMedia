@@ -8,15 +8,29 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.geekapps.geekmedia.R;
+import com.geekapps.geekmedia.video.VideoData;
+import com.geekapps.geekmedia.video.VideoPlayerFragment;
 
 public class ImageViewerFragment extends Fragment {
 
     private static final String TAG = ImageViewerFragment.class.getSimpleName();
     private static final String EXTRA_IMAGE_DATA = "EXTRA_IMAGE_DATA";
+    private static final String EXTRA_ACCENT_COLOR = "EXTRA_ACCENT_COLOR";
 
     private ImageDownloader mImageDownloader;
     private TouchImageView mTouchImage;
+
+    private int mAccentColor;
     private ImageData mImageData;
+
+    public static ImageViewerFragment newInstance(ImageData data, int accentColor) {
+        ImageViewerFragment fragment = new ImageViewerFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(EXTRA_IMAGE_DATA, data);
+        args.putSerializable(EXTRA_ACCENT_COLOR, accentColor);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public static ImageViewerFragment newInstance(ImageData data) {
         ImageViewerFragment fragment = new ImageViewerFragment();
@@ -35,6 +49,7 @@ public class ImageViewerFragment extends Fragment {
             throw new IllegalStateException("ImageViewerFragment must be instantiated via `newInstance` factory method");
         }
         mImageData = (ImageData) args.getSerializable(EXTRA_IMAGE_DATA);
+        mAccentColor = args.getInt(EXTRA_ACCENT_COLOR);
         mImageDownloader = getImageDownloaderFactory().provideImageDownloader(getContext());
     }
 

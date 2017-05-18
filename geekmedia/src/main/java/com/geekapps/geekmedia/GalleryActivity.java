@@ -6,6 +6,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -22,17 +23,18 @@ import com.geekapps.geekmedia.image.ImageDownloader;
 import com.geekapps.geekmedia.image.ImageDownloaderFactory;
 import com.geekapps.geekmedia.image.PicassoImageDownloaderFactory;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.view.View.GONE;
-
-public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, AccentColorProvider {
 
     public static final String TAG = GalleryActivity.class.getName();
-    public static final String POSITION_EXTRA = "POSITION_EXTRA";
+
+    private static final String POSITION_EXTRA = "POSITION_EXTRA";
     private static final String FILES_EXTRA = "FILES_EXTRA";
+    private static final String ACCENT_COLOR_EXTRA = "ACCENT_COLOR_EXTRA";
+    private static final String SHOW_TRANSITION_EXTRA = "SHOW_TRANSITION_EXTRA";
+    private static final int NO_COLOR = -1;
 
     private ImageDownloader mImageDownloader;
 
@@ -41,56 +43,59 @@ public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPa
     private FrameLayout mIndicatorContainer;
     private CircleIndicator mIndicators;
 
+    private int mAccentColor = NO_COLOR;
     private int mCurrentItemPosition;
 
-    public static void show(Activity context, List<MediaFile> files) {
-        show(context, files, 0);
-    }
+    public static class Builder {
 
-    public static void show(Activity context,
-                            List<MediaFile> files,
-                            int position) {
+        private final Activity mActivity;
+        private final List<MediaFile> mFiles;
+        private final Intent mIntent;
+        private int mRequestCode;
+        private ImageView mSharedImage;
 
-        Intent intent = new Intent(context, GalleryActivity.class);
-        intent.putExtra(FILES_EXTRA, new ArrayList<>(files));
-        intent.putExtra(POSITION_EXTRA, position);
-        context.startActivityForResult(intent, 0);
-    }
+        public Builder(@NonNull Activity activity, @NonNull List<MediaFile> files) {
+            mActivity = activity;
+            mFiles = files;
+            mIntent = new Intent(activity, GalleryActivity.class);
+            mIntent.putExtra(FILES_EXTRA, new ArrayList<>(mFiles));
+        }
 
-    public static void show(Activity activity,
-                            ImageView sharedImage,
-                            List<MediaFile> files,
-                            int position) {
+        public Builder(@NonNull Fragment fragment, @NonNull List<MediaFile> files) {
+            this(fragment.getActivity(), files);
+        }
 
-        Intent intent = new Intent(activity, GalleryActivity.class);
-        intent.putExtra(FILES_EXTRA, (Serializable) files);
-        intent.putExtra(POSITION_EXTRA, position);
+        public Builder setInitialPosition(int position) {
+            mIntent.putExtra(POSITION_EXTRA, position);
+            return this;
+        }
 
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity,
-                sharedImage,
-                activity.getString(R.string.transition_name_photo));
+        public Builder setRequestCode(int requestCode) {
+            mRequestCode = requestCode;
+            return this;
+        }
 
-        activity.startActivity(intent, options.toBundle());
-    }
+        public Builder setSharedImage(ImageView imageView) {
+            mSharedImage = imageView;
+            mIntent.putExtra(SHOW_TRANSITION_EXTRA, true);
+            return this;
+        }
 
-    public static void show(Fragment fragment,
-                            int requestCode,
-                            ImageView sharedImage,
-                            List<MediaFile> files,
-                            int position) {
+        public Builder setAccentColor(@ColorInt int accentColor) {
+            mIntent.putExtra(ACCENT_COLOR_EXTRA, accentColor);
+            return this;
+        }
 
-        Activity activity = fragment.getActivity();
-        Intent intent = new Intent(activity, GalleryActivity.class);
-        intent.putExtra(FILES_EXTRA, (Serializable) files);
-        intent.putExtra(POSITION_EXTRA, position);
-
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity,
-                sharedImage,
-                activity.getString(R.string.transition_name_photo));
-
-        fragment.startActivityForResult(intent, requestCode, options.toBundle());
+        public void show() {
+            Bundle options = null;
+            if (mSharedImage != null) {
+                options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        mActivity,
+                        mSharedImage,
+                        mActivity.getString(R.string.transition_name_photo)).toBundle();
+            }
+            mActivity.startActivityForResult(mIntent, mRequestCode, options);
+        }
     }
 
     @Override
@@ -105,15 +110,25 @@ public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPa
         mIndicatorContainer = (FrameLayout) findViewById(R.id.activity_gallery_indicator_container);
         mIndicators = (CircleIndicator) findViewById(R.id.activity_gallery_indicators);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Transition transition = getWindow().getSharedElementEnterTransition();
-            boolean shouldShowTransition = savedInstanceState == null
-                    && transition != null;
+        Bundle args = getIntent().getExtras();
+        if (args == null) {
+            throw new IllegalStateException("Activity must be instantiated via Builder");
+        }
 
+        List<MediaFile> files = (List<MediaFile>) args.getSerializable(FILES_EXTRA);
+        if (files == null || files.isEmpty()) {
+            throw new IllegalStateException("There must be at least 1 MediaFile");
+        }
+
+        mCurrentItemPosition = args.getInt(POSITION_EXTRA, 0);
+        mAccentColor = args.getInt(ACCENT_COLOR_EXTRA, ContextCompat.getColor(this, R.color.colorAccent));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            boolean shouldShowTransition = args.getBoolean(SHOW_TRANSITION_EXTRA, false);
             mPhotoContainer.setVisibility(shouldShowTransition ? View.VISIBLE : View.GONE);
             mViewPager.setVisibility(shouldShowTransition ? View.GONE : View.VISIBLE);
-
             if (shouldShowTransition) {
+                Transition transition = getWindow().getSharedElementEnterTransition();
                 transition.addListener(new SimpleTransitionListener() {
                     @Override
                     public void onTransitionEnd(Transition transition) {
@@ -137,14 +152,6 @@ public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPa
             mViewPager.setVisibility(View.VISIBLE);
         }
 
-        Bundle args = getIntent().getExtras();
-        List<MediaFile> files = (List<MediaFile>) args.getSerializable(FILES_EXTRA);
-        mCurrentItemPosition = args.getInt(POSITION_EXTRA);
-
-        if (files == null || files.isEmpty()) {
-            throw new IllegalStateException("There must be at least 1 MediaFile");
-        }
-
         mImageDownloader = getImageDownloaderFactory().provideImageDownloader(this);
         mImageDownloader.loadImage(
                 files.get(mCurrentItemPosition).getImageData().getSource(),
@@ -152,6 +159,7 @@ public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPa
                 mPhotoContainer);
 
         GalleryAdapter adapter = GalleryAdapter.from(getSupportFragmentManager(), files);
+        adapter.setAccentColorProvider(this);
         mViewPager.setAdapter(adapter);
         mViewPager.addOnPageChangeListener(this);
         mViewPager.setCurrentItem(mCurrentItemPosition);
@@ -199,7 +207,12 @@ public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPa
 
     @ColorInt
     public int getIndicatorColor() {
-        return ContextCompat.getColor(this, R.color.colorAccent);
+        return provideAccentColor();
+    }
+
+    @Override
+    public int provideAccentColor() {
+        return mAccentColor;
     }
 
     @Override

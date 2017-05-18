@@ -37,6 +37,7 @@ public class VideoPlayerFragment extends Fragment implements
     public static final String TAG = VideoPlayerFragment.class.getName();
 
     private static final String EXTRA_VIDEO_DATA = "EXTRA_VIDEO_DATA";
+    private static final String EXTRA_ACCENT_COLOR = "EXTRA_ACCENT_COLOR";
 
     private int mAnimationDuration;
 
@@ -50,11 +51,21 @@ public class VideoPlayerFragment extends Fragment implements
     private View mPlayPause;
 
     private VideoData mVideoData;
+    private int mAccentColor;
 
     private ImageDownloader mImageDownloader;
     private VideoPlayer mPlayer;
     private boolean mShouldPlay;
     private final AtomicBoolean mDragFlag = new AtomicBoolean();
+
+    public static VideoPlayerFragment newInstance(VideoData data, int accentColor) {
+        VideoPlayerFragment fragment = new VideoPlayerFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(EXTRA_VIDEO_DATA, data);
+        args.putSerializable(EXTRA_ACCENT_COLOR, accentColor);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     public static VideoPlayerFragment newInstance(VideoData data) {
         VideoPlayerFragment fragment = new VideoPlayerFragment();
@@ -70,9 +81,11 @@ public class VideoPlayerFragment extends Fragment implements
         onBeforeCreate();
 
         Bundle args = getArguments();
-        if (args != null) {
-            mVideoData = (VideoData) args.getSerializable(EXTRA_VIDEO_DATA);
+        if (args == null) {
+            throw new IllegalStateException("Fragment must be instantiated via `newInstance` factory method");
         }
+        mVideoData = (VideoData) args.getSerializable(EXTRA_VIDEO_DATA);
+        mAccentColor = args.getInt(EXTRA_ACCENT_COLOR, ContextCompat.getColor(getContext(), R.color.colorAccent));
 
         mImageDownloader = getImageDownloaderFactory().provideImageDownloader(getContext());
         mPlayer = getVideoPlayerFactory().provideVideoPlayer(getContext());
@@ -212,7 +225,7 @@ public class VideoPlayerFragment extends Fragment implements
 
     @ColorInt
     public int getPlaceholderLoaderColor() {
-        return ContextCompat.getColor(getContext(), R.color.colorAccent);
+        return mAccentColor;
     }
 
     @ColorInt
