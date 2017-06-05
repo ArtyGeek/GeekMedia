@@ -164,7 +164,7 @@ public class GalleryActivity extends AppCompatActivity implements ViewPager.OnPa
         mViewPager.addOnPageChangeListener(this);
         mViewPager.setCurrentItem(mCurrentItemPosition);
 
-        mIndicatorContainer.setVisibility(View.VISIBLE);
+        mIndicatorContainer.setVisibility(files.size() > 1 ? View.VISIBLE : View.GONE);
         GradientDrawable indicatorDrawable = (GradientDrawable) ContextCompat.getDrawable(this, R.drawable.shape_indicator_white);
         indicatorDrawable.setColor(getIndicatorColor());
         mIndicators.setSelectedIndicatorDrawable(indicatorDrawable);
