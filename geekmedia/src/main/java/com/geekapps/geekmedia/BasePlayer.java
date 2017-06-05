@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 
+import com.geekapps.geekmedia.audio.PlaybackState;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -177,7 +178,12 @@ public abstract class BasePlayer implements Player, ExoPlayer.EventListener {
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        notifyPlayerStateChanged(playWhenReady);
+        if (playbackState != ExoPlayer.STATE_ENDED) {
+            notifyPlayerStateChanged(playWhenReady ? PlaybackState.PLAY : PlaybackState.PAUSE);
+        } else {
+            notifyPlayerStateChanged(PlaybackState.STOP);
+        }
+
         if (playWhenReady) {
             if (mObserverFuture == null || mObserverFuture.isDone()) {
                 mObserverFuture = mObserverExecutor.scheduleAtFixedRate(buildObserverRunnable(), 50, 50, TimeUnit.MILLISECONDS);
@@ -226,13 +232,13 @@ public abstract class BasePlayer implements Player, ExoPlayer.EventListener {
         }
     }
 
-    private void notifyPlayerStateChanged(final boolean playWhenReady) {
+    private void notifyPlayerStateChanged(final PlaybackState state) {
         for (final WeakReference<OnPlaybackChangeListener> ref : mOnPlaybackChangeListeners) {
             if (ref.get() != null) {
                 UI_HANDLER.post(new Runnable() {
                     @Override
                     public void run() {
-                        ref.get().onPlaybackChanged(playWhenReady);
+                        ref.get().onPlaybackChanged(state);
                     }
                 });
             }
