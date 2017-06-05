@@ -92,6 +92,7 @@ public final class CircleIndicator extends LinearLayout {
         int gravity = typedArray.getInt(R.styleable.CircleIndicator_ci_gravity, -1);
         setGravity(gravity >= 0 ? gravity : Gravity.CENTER);
 
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
         typedArray.recycle();
     }
 
