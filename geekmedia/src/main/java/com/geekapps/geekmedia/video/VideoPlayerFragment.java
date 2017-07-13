@@ -89,7 +89,6 @@ public class VideoPlayerFragment extends Fragment implements
 
         mImageDownloader = getImageDownloaderFactory().provideImageDownloader(getContext());
         mPlayer = getVideoPlayerFactory().provideVideoPlayer(getContext());
-        mShouldPlay = true;
 
         mAnimationDuration = getContext().getResources().getInteger(android.R.integer.config_shortAnimTime);
     }
